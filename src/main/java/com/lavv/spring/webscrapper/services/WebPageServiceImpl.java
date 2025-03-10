@@ -25,7 +25,7 @@ public class WebPageServiceImpl implements WebPageService {
         return new ArrayList<>(webPageRepository.findByText(query));
     }
 
-    public void scrapeAndSave(String url) throws IOException {
+    public void  scrapeAndSave(String url) throws IOException {
 
         Document document = Jsoup.connect(url).get();
 
@@ -57,6 +57,12 @@ public class WebPageServiceImpl implements WebPageService {
 
     public List<String> getAllLinks(String url) {
 
+        WebPage findWebPage = webPageRepository.findByUrl(url);
+
+        if (findWebPage != null) {
+            return new ArrayList<>();
+        }
+
         List<String> result = new ArrayList<>();
 
         try {
@@ -64,7 +70,12 @@ public class WebPageServiceImpl implements WebPageService {
             Elements links = document.select("a[href]");
             for (Element link: links) {
                 String linkHref = link.attr("href");
-                result.add(linkHref);
+                if (linkHref.startsWith("/")) {
+                    linkHref = "https://" + getDomainFromUrl(url) + linkHref;
+                }
+                if (!result.contains(linkHref)  && !linkHref.startsWith("#main-content")) {
+                    result.add(linkHref);
+                }
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());

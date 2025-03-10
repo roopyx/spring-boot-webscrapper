@@ -20,4 +20,6 @@ public interface WebPageRepository extends CrudRepository<WebPage, Integer> {
         "OR w.url LIKE %:text%"
     )
     List<WebPage> findByText(@Param("text") String text);
+
+    WebPage findByUrl(String url);
 }
